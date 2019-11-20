@@ -21,12 +21,14 @@ BOOL InjectDll(LPCTSTR szDllPath, HANDLE hProcess) {
 	LPTHREAD_START_ROUTINE pThreadproc;
 
 	pRemoteBuf = VirtualAllocEx(hProcess, NULL, dwBufSize, MEM_COMMIT, PAGE_READWRITE);
-	printf("writememory : %d\n",WriteProcessMemory(hProcess, pRemoteBuf, (LPVOID)szDllPath, dwBufSize, NULL));
+	WriteProcessMemory(hProcess, pRemoteBuf, (LPVOID)szDllPath, dwBufSize, NULL);
+	
 	hModule = GetModuleHandle(TEXT("kernel32.dll"));
 	pThreadproc = (LPTHREAD_START_ROUTINE)GetProcAddress(hModule, "LoadLibraryW");
+	
 	hThread = CreateRemoteThread(hProcess, NULL, 0, pThreadproc, pRemoteBuf, 0, NULL);
-	printf("hthread : %x\n", hThread);
 	WaitForSingleObject(hThread, INFINITE);
+	
 	CloseHandle(hThread);
 
 	return TRUE;
